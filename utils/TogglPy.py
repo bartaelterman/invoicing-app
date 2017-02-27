@@ -1,6 +1,12 @@
 #--------------------------------------------------------------
 # TogglPy is a non-cluttered, easily understood and implemented
 # library for interacting with the Toggl API.
+#
+# Original version: https://github.com/matthewdowney/TogglPy
+# Updates by Bart Aelterman:
+#   - Ported to Python 3,
+#   - Uses requests instead of urllib
+#   - Added a getTimeEntries method
 #--------------------------------------------------------------
 from datetime import datetime
 # for making requests
