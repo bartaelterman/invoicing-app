@@ -1,4 +1,5 @@
 import pandas as pd
+from django.contrib.auth.models import User
 from django.db import models
 
 class Client(models.Model):
@@ -11,8 +12,22 @@ class Client(models.Model):
         return self.name
 
 
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    invoice_name = models.CharField(max_length=200)
+    address_line_1 = models.CharField(max_length=100)
+    address_line_2 = models.CharField(max_length=100)
+    bank_account = models.CharField(max_length=20, unique=True)
+    phone = models.CharField(max_length=20, unique=True)
+    email = models.EmailField()
+    VAT_number = models.CharField(max_length=20, unique=True)
+
+    def __str__(self):
+        return self.invoice_name
+
 class Project(models.Model):
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
+    user = models.ForeignKey(Profile)
     name = models.CharField(max_length=200)
     rate = models.FloatField()
     togglId = models.CharField(max_length=20, unique=True)

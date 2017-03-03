@@ -1,0 +1,59 @@
+{% extends 'report_base.html' %}
+
+{% block body %}
+
+
+    <div class="row">
+        <div class="col-md-5 col-md-offset-1" id="user-details">
+            <ul>
+                <li><b>Leveranciersgegevens</b></li>
+                <li>{{ user.invoice_name }}</li>
+                <li>{{ user.address_line_1 }}</li>
+                <li>{{ user.address_line_2 }}</li>
+                <li>{{ user.phone }}</li>
+                <li>{{ user.email }}</li>
+                <li>BTW: {{ user.VAT_number }}</li>
+                <li>IBAN: {{ user.bank_account }}</li>
+            </ul>
+        </div>
+
+        <div class="col-md-5" id="customer-details">
+            <ul>
+                <li><b>Klant</b></li>
+                <li>Vente-Exclusive</li>
+            </ul>
+        </div>
+    </div>
+
+<br><br>
+
+    <div class="row">
+
+        <div class="col-md-offset-1 col-md-10">
+
+            <div id="invoice-details">
+                <p>Tijdsregistratie periode {{ start }} tot {{ end }}</p>
+                <p>Totaal aantal dagen: {{ total_days }}</p>
+            </div>
+
+            <br>
+
+            <table>
+                <tbody>
+                    {% for week in timeentries %}
+                    <tr>
+                        <td><span class="date-label">{{ week.monday.date }}</span> <br> <span class="duration">{{ week.monday.duration }}</span></td>
+                        <td><span class="date-label">{{ week.tuesday.date }}</span> <br> <span class="duration">{{ week.tuesday.duration }}</span></td>
+                        <td><span class="date-label">{{ week.wednesday.date }}</span> <br> <span class="duration">{{ week.wednesday.duration }}</span></td>
+                        <td><span class="date-label">{{ week.thursday.date }}</span> <br> <span class="duration">{{ week.thursday.duration }}</span></td>
+                        <td><span class="date-label">{{ week.friday.date }}</span> <br> <span class="duration">{{ week.friday.duration }}</span></td>
+                        <td><span class="date-label">{{ week.saturday.date }}</span> <br> <span class="duration">{{ week.saturday.duration }}</span></td>
+                        <td><span class="date-label">{{ week.sunday.date }}</span> <br> <span class="duration">{{ week.sunday.duration }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+{% endblock %}

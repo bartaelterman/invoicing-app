@@ -1,58 +1,76 @@
-<html>
-<link type="text/css" href="theme.css" rel="stylesheet" />
-<body>
+{% extends 'report_base.html' %}
 
-    <header>
-        <h1>Bart Aelterman</h1>
-        <small>Data Science and data engineering consultant</small>
-    </header>
+{% block body %}
+    <div class="row">
+        <div class="col-md-5 col-md-offset-1" id="user-details">
+            <ul>
+                <li><b>Leveranciersgegevens</b></li>
+                <li>{{ user.invoice_name }}</li>
+                <li>{{ user.address_line_1 }}</li>
+                <li>{{ user.address_line_2 }}</li>
+                <li>{{ user.phone }}</li>
+                <li>{{ user.email }}</li>
+                <li>BTW: {{ user.VAT_number }}</li>
+                <li>IBAN: {{ user.bank_account }}</li>
+            </ul>
+        </div>
 
-    <div id="user-details">
-        <ul>
-            <li><b>Leveranciersgegevens</b></li>
-            <li>Bart Aelterman</li>
-            <li>Kapelstraat 329</li>
-            <li>2660 Hoboken</li>
-            <li>0032 486 909 952</li>
-            <li>bart.aelterman@gmail.com</li>
-            <li>BTW nummer</li>
-            <li>Rekening nummer</li>
-        </ul>
+        <div class="col-md-5" id="customer-details">
+            <ul>
+                <li><b>Klantgegevens</b></li>
+                <li>{{ client.name }}</li>
+                <li>{{ client.address_line_1 }}</li>
+                <li>{{ client.address_line_2 }}</li>
+                <li>{{ client.VAT_number }}</li>
+            </ul>
+        </div>
     </div>
 
-    <div id="customer-details">
-        <ul>
-            <li><b>Klantgegevens</b></li>
-            <li>{{ client.name }}</li>
-            <li>{{ client.address_line_1 }}</li>
-            <li>{{ client.address_line_2 }}</li>
-            <li>{{ client.VAT_number }}</li>
-        </ul>
+    <div class="row">
+        <div class="col-md-offset-1 col-md-10"id="invoice-details">
+            <ul>
+                <li><b>Factuurgegevens</b></li>
+                <li>Factuurnummer: {{ invoice_number }}</li>
+                <li>Factuurdatum: {{ invoice_date }}</li>
+                <li>Leveringsdatum: {{ invoice_delivery_date }}</li>
+                <li>Betreft: {{ description }}</li>
+            </ul>
+        </div>
     </div>
 
-    <div id="invoice-details">
-        <ul>
-            <li><b>Factuurgegevens</b></li>
-            <li>Factuurnummer: {{ invoice_number }}</li>
-            <li>Factuurdatum: {{ invoice_date }}</li>
-            <li>Leveringsdatum: {{ invoice_delivery_date }}</li>
-            <li>Betreft: {{ project_description }}</li>
-        </ul>
+    <br>
+    <br>
+
+    <div class="row">
+
+        <div class="col-md-offset-1 col-md-10">
+
+            <table width="83%">
+
+                <col width="20%">
+                <col width="20%">
+                <col width="20%">
+                <col width="20%">
+                <col width="20%">
+                <tr>
+                    <th>Aantal (dagen)</th> <th>Eenheidsprijs</th> <th>Totaal</th> <th>BTW (21%)</th> <th>Totaal incl BTW</th>
+                </tr>
+                <tbody>
+                    <tr>
+                        <td>{{ nr_of_days }}</td> <td>€ {{ rate }}</td> <td>€ {{ total }}</td> <td>€ {{ vat }}</td><td>€ {{ total_vat }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </div>
     </div>
 
-    <table>
-        <thead>
-            <th>Description</th> <th>Amount (days)</th> <th>Price per day</th> <th>Total</th> <th>Total BTW incl</th>
-        </thead>
-        <tbody>
-            <tr>
-                <td>{{ description }}</td> <td>{{ nr_of_days }}</td> <td>{{ rate }}</td> <td>{{ total }}</td> <td>{{ total_vat }}</td>
-            </tr>
-        </tbody>
-    </table>
+    <br>
 
-    <footer>
-        <p>Gelive binnen 30 dagen te voldoen op bovenvermeld rekeningnummer met vermelding van het factuurnummer</p>
-    </footer>
-</body>
-</html>
+    <div class="row">
+        <div class="col-md-offset-1 col-md-10">
+            <p>Gelive binnen 30 dagen te voldoen op bovenvermeld rekeningnummer met vermelding van het factuurnummer</p>
+        </div>
+    </div>
+
+{% endblock %}

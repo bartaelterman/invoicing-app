@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Client, Invoice, Project, TimeEntry
+from .models import Client, Invoice, Profile, Project, TimeEntry
 from admin_views.admin import AdminViews
 
 class ProjectAdmin(AdminViews):
@@ -16,4 +16,5 @@ admin.site.register(Project, ProjectAdmin)
 
 admin.site.register(Client)
 admin.site.register(Invoice)
+admin.site.register(Profile)
 admin.site.register(TimeEntry)
