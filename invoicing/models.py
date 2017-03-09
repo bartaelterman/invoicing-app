@@ -2,7 +2,11 @@ import pandas as pd
 from django.contrib.auth.models import User
 from django.db import models
 
+
 class Client(models.Model):
+    """
+    Contact and invoicing details of the client
+    """
     address_line_1 = models.CharField(max_length=100)
     address_line_2 = models.CharField(max_length=100)
     name = models.CharField(max_length=200, unique=True)
@@ -13,6 +17,11 @@ class Client(models.Model):
 
 
 class Profile(models.Model):
+    """
+    Additional attributes that belong to the user of the application. This includes
+    details of him/her that should also be mentioned on the invoice. It includes a one-to-one
+    relationship with the User model, a built-in model from django's authentication.
+    """
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     invoice_name = models.CharField(max_length=200)
     address_line_1 = models.CharField(max_length=100)
@@ -25,11 +34,18 @@ class Profile(models.Model):
     def __str__(self):
         return self.invoice_name
 
+
 class Project(models.Model):
+    """
+    A user can create one or many projects for a given client. Note that:
+      - rate: is the rate agreed for this project between the user and the client. While not explicitly
+        stated here, other parts of the application will assume that this is for 8 hours, VAT excluded.
+      - togglId: the id of the project in toggl.
+    """
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
     user = models.ForeignKey(Profile)
     name = models.CharField(max_length=200)
-    rate = models.FloatField()
+    rate = models.FloatField()  # daily
     togglId = models.CharField(max_length=20, unique=True)
 
     def __str__(self):
@@ -37,16 +53,24 @@ class Project(models.Model):
 
 
 class TimeEntryDFManager(models.Manager):
+    """
+    Helper manager to get time entries returned as a pandas DataFrame
+    """
     def get_queryset_df(self, *args, **kwargs):
         df = pd.DataFrame(list(super(TimeEntryDFManager, self).get_queryset().filter(*args, **kwargs).values()))
         return df
 
+
 class TimeEntry(models.Model):
-    billable = models.BooleanField(default=True)
+    """
+    An amount of time worked on a project. Can be billable or not (although at the current state, the invoicing
+    logic does not take this into account yet)
+    """
+    billable = models.BooleanField(default=True)  # todo: make sure time entries with billable = False are not included in time sheets and invoices
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     start = models.DateTimeField()
     duration = models.FloatField()
-    duration_unit = models.CharField(choices=(('days', 'days'), ('hours', 'hours'), ('minutes', 'minutes')), default='hours', max_length=10)
+    duration_unit = models.CharField(choices=(('days', 'days'), ('hours', 'hours'), ('minutes', 'minutes')), default='hours', max_length=10)  # todo: current reports can only handle 'hours'
     togglId = models.CharField(max_length=20, unique=True)
 
     objects = TimeEntryDFManager()
@@ -56,9 +80,13 @@ class TimeEntry(models.Model):
 
 
 class Invoice(models.Model):
-    number = models.IntegerField(unique=True)
+    """
+    A model to store invoice data.
+    """
+    number = models.IntegerField(unique=True)  # todo: autogenerate based on previous invoices
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
-    VAT_percentage = models.IntegerField(default=21)
+    VAT_percentage = models.IntegerField(default=21)  # or should this be a part of the Project?
+    # todo: maybe add a "paid" attribute so that the user can keep track of open invoices
 
     def __str__(self):
         return self.number
