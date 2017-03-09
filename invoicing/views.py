@@ -1,5 +1,6 @@
 import pandas as pd
 from collections import defaultdict
+from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from datetime import date, datetime, timedelta
 from .models import Client, Profile, Project, TimeEntry
@@ -105,6 +106,5 @@ def get_time_entries(request):
         project = Project.objects.get(pk=int(project_id))
         start = datetime.strptime(start_str, '%Y-%m-%d')
         end = datetime.strptime(end_str, '%Y-%m-%d')
-        entries = TimeEntry.objects.filter(start__gte=start, start__lte=end, project__pk=project.id)
-        print(entries)
-        return entries.to_json()
+        entries = TimeEntry.objects.get_queryset_df(start__gte=start, start__lte=end, project=project)
+        return HttpResponse(entries.T.to_json())
