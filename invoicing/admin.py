@@ -12,9 +12,14 @@ class InvoiceAdmin(admin.ModelAdmin):
     change_form_template = 'admin/invoice_change_form.html'
 
 
+class TimeEntryAdmin(admin.ModelAdmin):
+    list_display = ('project', 'start', 'duration', 'billable',)
+    list_filter = ('project__name',)
+
+
 admin.site.register(Project, ProjectAdmin)
 
 admin.site.register(Client)
 admin.site.register(Invoice)
 admin.site.register(Profile)
-admin.site.register(TimeEntry)
+admin.site.register(TimeEntry, TimeEntryAdmin)
