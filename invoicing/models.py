@@ -47,6 +47,8 @@ class Project(models.Model):
     name = models.CharField(max_length=200)
     rate = models.FloatField()  # daily
     togglId = models.CharField(max_length=20, unique=True)
+    timesheet_template = models.CharField(max_length=50, null=True, blank=True)
+    invoice_template = models.CharField(max_length=50, null=True, blank=True)
 
     def __str__(self):
         return self.name

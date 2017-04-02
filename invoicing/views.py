@@ -19,21 +19,25 @@ def generate_timesheet(request):
         project_id = request.GET.get('project', '1')
         start_str = request.GET.get('start', '2017-01-01')
         end_str = request.GET.get('end', '2017-12-31')
+        time_unit = request.GET.get('unit', 'days')
 
         project = Project.objects.get(pk=int(project_id))
         client = Client.objects.get(pk=int(project.client_id))
+        user = Profile.objects.get(pk=int(project.user_id))
         start = datetime.strptime(start_str, '%Y-%m-%d')
         end = datetime.strptime(end_str, '%Y-%m-%d') + timedelta(days=1)
         print('start: {0}'.format(start.isoformat()))
         print('end: {0}'.format(end.isoformat()))
         entries = TimeEntry.objects.get_queryset_df(start__gte=start, start__lte=end, project=project)
-        total_nr_of_days = entries['duration'].sum() / 8.0
+        unit_hours = 8.0 if time_unit == 'days' else 1.0
+        total = entries['duration'].sum() / unit_hours
         # entries['week'] = entries['start'].apply(lambda x: x.isocalendar()[1])
         # entries['weekday'] = entries['start'].apply(lambda x: x.isoweekday())
         entries_by_week_dict = defaultdict(dict)
         for day in pd.date_range(start=start_str, end=end_str):
             duration = entries[(entries['start'] >= day) & (entries['start'] <= day + timedelta(days=1))]['duration'].sum()
-            weeknr = str(day.isocalendar()[0]) + '_' + str(day.isocalendar()[1])
+            weeknr = str(day.isocalendar()[0]) + '_' + '{:02}'.format(day.isocalendar()[1])
+            print(weeknr)
             weekday = ['', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'][day.isocalendar()[2]]
             entries_by_week_dict[weeknr][weekday] = {'date': day.strftime('%d-%m-%Y'), 'duration': duration}
         entries_by_week = [entries_by_week_dict[x] for x in sorted(entries_by_week_dict.keys())]
@@ -51,9 +55,12 @@ def generate_timesheet(request):
             'end': end_out_str,
             'start': start_out_str,
             'timeentries': entries_by_week,
-            'total_days': '{0:.1f}'.format(total_nr_of_days)
+            'total': '{0:.1f}'.format(total),
+            'time_unit': time_unit,
+            'user': user
         }
-        return render_to_response('timesheet.html', context)
+        template_file = project.timesheet_template if project.timesheet_template else 'timehseet.html'
+        return render_to_response(template_file, context)
 
 def generate_invoice(request):
     """

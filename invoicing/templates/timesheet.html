@@ -20,7 +20,10 @@
         <div class="col-md-5" id="customer-details">
             <ul>
                 <li><b>Klant</b></li>
-                <li>Vente-Exclusive</li>
+                <li>{{ client.name }}</li>
+                <li>{{ client.address_line_1 }}</li>
+                <li>{{ client.address_line_2 }}</li>
+                <li>BTW: {{ client.VAT_number }}</li>
             </ul>
         </div>
     </div>
@@ -33,7 +36,7 @@
 
             <div id="invoice-details">
                 <p>Tijdsregistratie periode {{ start }} tot {{ end }}</p>
-                <p>Totaal aantal dagen: {{ total_days }}</p>
+                <p>Totaal aantal {{ time_unit }}: {{ total }}</p>
             </div>
 
             <br>
