@@ -59,7 +59,7 @@ def generate_timesheet(request):
             'time_unit': time_unit,
             'user': user
         }
-        template_file = project.timesheet_template if project.timesheet_template else 'timehseet.html'
+        template_file = project.timesheet_template if project.timesheet_template else 'calendar_timehseet.html'
         return render_to_response(template_file, context)
 
 def generate_invoice(request):
