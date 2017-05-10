@@ -1,0 +1,61 @@
+{% extends 'report_base.html' %}
+
+{% block body %}
+
+
+    <div class="row">
+        <div class="col-md-5 col-md-offset-1" id="user-details">
+            <ul>
+                <li><b>Leveranciersgegevens</b></li>
+                <li>{{ user.invoice_name }}</li>
+                <li>{{ user.address_line_1 }}</li>
+                <li>{{ user.address_line_2 }}</li>
+                <li>{{ user.phone }}</li>
+                <li>{{ user.email }}</li>
+                <li>BTW: {{ user.VAT_number }}</li>
+                <li>IBAN: {{ user.bank_account }}</li>
+            </ul>
+        </div>
+
+        <div class="col-md-5" id="customer-details">
+            <ul>
+                <li><b>Klant</b></li>
+                <li>{{ client.name }}</li>
+                <li>{{ client.address_line_1 }}</li>
+                <li>{{ client.address_line_2 }}</li>
+                <li>BTW: {{ client.VAT_number }}</li>
+            </ul>
+        </div>
+    </div>
+
+<br><br>
+
+    <div class="row">
+
+        <div class="col-md-offset-1 col-md-10">
+
+            <div id="invoice-details">
+                <p>Tijdsregistratie periode {{ start }} tot {{ end }}</p>
+                <p>Totaal aantal {{ time_unit }}: {{ total }}</p>
+            </div>
+
+            <br>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Datum</th> <th>Duur (uur)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for timeentry in timeentries %}
+                    <tr>
+                        <td>{{ timeentry.date|date:"c" }}</td> <td>{{ timeentry.duration }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+{% endblock %}

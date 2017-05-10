@@ -1,0 +1,11 @@
+{% extends 'report_base.html' %}
+
+{% block body %}
+    <p>Timesheet form</p>
+    <form action="{% url 'timesheet' %}">
+      {{ form.as_table }}
+    <input type="submit">
+    </form>
+    <p>Select project, time range and other details here</p>
+
+{% endblock %}

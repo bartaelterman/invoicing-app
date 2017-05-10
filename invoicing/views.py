@@ -4,8 +4,15 @@ from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from datetime import date, datetime, timedelta
 from .models import Client, Profile, Project, TimeEntry
+from .forms import TimesheetForm
 
 def generate_timesheet(request):
+    form = TimesheetForm()
+    context = {'form': form}
+    return render_to_response('timesheet_form.html', context)
+
+
+def display_timesheet(request):
     """
     get all time entries for a project and date range, and generate a timesheet.
 
@@ -30,6 +37,7 @@ def generate_timesheet(request):
         print('end: {0}'.format(end.isoformat()))
         entries = TimeEntry.objects.get_queryset_df(start__gte=start, start__lte=end, project=project)
         unit_hours = 8.0 if time_unit == 'days' else 1.0
+        entries['date'] = entries['start'].dt.date
         total = entries['duration'].sum() / unit_hours
         # entries['week'] = entries['start'].apply(lambda x: x.isocalendar()[1])
         # entries['weekday'] = entries['start'].apply(lambda x: x.isoweekday())
@@ -42,10 +50,7 @@ def generate_timesheet(request):
             entries_by_week_dict[weeknr][weekday] = {'date': day.strftime('%d-%m-%Y'), 'duration': duration}
         entries_by_week = [entries_by_week_dict[x] for x in sorted(entries_by_week_dict.keys())]
 
-        print(entries_by_week_dict)
-
-        print(entries_by_week)
-
+        timeentries = entries.to_dict(orient='records')
         start_out_str = start.strftime('%d-%m-%Y')
         end_out_str = (end - timedelta(days=1)).strftime('%d-%m-%Y')
 
@@ -54,12 +59,13 @@ def generate_timesheet(request):
             'description': 'description',
             'end': end_out_str,
             'start': start_out_str,
-            'timeentries': entries_by_week,
+            'entries_by_week': entries_by_week,
+            'timeentries': timeentries,
             'total': '{0:.1f}'.format(total),
             'time_unit': time_unit,
             'user': user
         }
-        template_file = project.timesheet_template if project.timesheet_template else 'calendar_timehseet.html'
+        template_file = project.timesheet_template if project.timesheet_template else 'calendar_timesheet.html'
         return render_to_response(template_file, context)
 
 def generate_invoice(request):
@@ -95,7 +101,7 @@ def generate_invoice(request):
             'invoice_number': number,
             'invoice_date': date.today().strftime(invoice_date_format),
             'invoice_delivery_date': (date.today().replace(day=1) - timedelta(days=1)).strftime(invoice_date_format),
-            'description': 'Prestaties {0} tot en met {1}'.format(out_start, out_end),
+            'description': 'Project: FFP150008, promotor: David Martens. ',
             'nr_of_days': '{0:.1f}'.format(total_days),
             'rate': '{0:.2f}'.format(project.rate),
             'total': '{0:.2f}'.format(total_price),
