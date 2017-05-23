@@ -1,4 +1,5 @@
 import pandas as pd
+from datetime import date
 from django.contrib.auth.models import User
 from django.db import models
 
@@ -85,10 +86,24 @@ class Invoice(models.Model):
     """
     A model to store invoice data.
     """
-    number = models.IntegerField(unique=True)  # todo: autogenerate based on previous invoices
+    number = models.IntegerField(unique=True, blank=True, null=True, help_text='autofilled, only fill in yourself if you want to override the default')  # will be autofilled, but is editable
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     VAT_percentage = models.IntegerField(default=21)  # or should this be a part of the Project?
-    # todo: maybe add a "paid" attribute so that the user can keep track of open invoices
+    date = models.DateField(editable=False)
+    start = models.DateField()
+    end = models.DateField()
+    days = models.DecimalField(max_digits=5, decimal_places=2)
+    paid = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        ''' On save, update timestamps '''
+        if not self.id:
+            if not self.number:
+                invoice_highest_number = Invoice.objects.all().order_by('-number').first()
+                latest_number = invoice_highest_number.number
+                self.number = latest_number + 1
+            self.date = date.today()
+        return super(Invoice, self).save(*args, **kwargs)
 
     def __str__(self):
-        return self.number
+        return '{} - {}: {}'.format(self.date, self.number, self.project)

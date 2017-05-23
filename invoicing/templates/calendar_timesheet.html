@@ -43,7 +43,7 @@
 
             <table>
                 <tbody>
-                    {% for week in timeentries %}
+                    {% for week in entries_by_week %}
                     <tr>
                         <td><span class="date-label">{{ week.monday.date }}</span> <br> <span class="duration">{{ week.monday.duration }}</span></td>
                         <td><span class="date-label">{{ week.tuesday.date }}</span> <br> <span class="duration">{{ week.tuesday.duration }}</span></td>

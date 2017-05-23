@@ -1,0 +1,21 @@
+{% extends 'report_base.html' %}
+
+{% block body %}
+    <p>Invoice form</p>
+    <form action="" method="post">
+        {% csrf_token %}
+        {{ form.as_table }}
+        <input type="submit" value="Create invoice">
+    </form>
+    <p>Select project, time range and other details here</p>
+
+    <h2>Existing invoices</h2>
+    <div id="invoices_list">
+    <ul>
+    {% for invoice in invoices %}
+        <li><a href="{% url 'display_invoice' %}?days={{ invoice.days }}&number={{ invoice.number }}&project={{ invoice.project.id }}&start={{ invoice.start|date:'c' }}&end={{ invoice.end|date:'c' }}">{{ invoice }}</a></li>
+    {% endfor %}
+    </ul>
+    </div>
+
+{% endblock %}

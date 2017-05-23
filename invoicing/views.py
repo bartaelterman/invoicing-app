@@ -1,15 +1,17 @@
 import pandas as pd
 from collections import defaultdict
+from django.contrib.auth import authenticate, login
 from django.http import HttpResponse
-from django.shortcuts import render_to_response
+from django.shortcuts import render
+from django.template import RequestContext
 from datetime import date, datetime, timedelta
-from .models import Client, Profile, Project, TimeEntry
-from .forms import TimesheetForm
+from .models import Client, Invoice, Profile, Project, TimeEntry
+from .forms import InvoiceForm, TimesheetForm
 
 def generate_timesheet(request):
     form = TimesheetForm()
     context = {'form': form}
-    return render_to_response('timesheet_form.html', context)
+    return render(request, 'timesheet_form.html', context)
 
 
 def display_timesheet(request):
@@ -66,9 +68,29 @@ def display_timesheet(request):
             'user': user
         }
         template_file = project.timesheet_template if project.timesheet_template else 'calendar_timesheet.html'
-        return render_to_response(template_file, context)
+        return render(request, template_file, context)
+
 
 def generate_invoice(request):
+    if request.method == 'GET':
+        form = InvoiceForm()
+    elif request.method == 'POST':
+        # todo: add toaster message
+        form = InvoiceForm(initial=request.POST)
+        project = Project.objects.get(pk=request.POST.get('project'))
+        start_str = request.POST.get('start')
+        start = date(*[int(x) for x in start_str.split('-')])
+        end_str = request.POST.get('end')
+        end = date(*[int(x) for x in end_str.split('-')])
+        days = request.POST.get('days')
+        invoice = Invoice(project=project, start=start, end=end, days=days)
+        invoice.save()
+    existing_invoices = Invoice.objects.all()
+    context = {'form': form, 'invoices': existing_invoices}
+    return render(request, 'invoice_form.html', context)
+
+
+def display_invoice(request):
     """
     get all time entries for a project and date range, and generate a invoice.
 
@@ -101,14 +123,14 @@ def generate_invoice(request):
             'invoice_number': number,
             'invoice_date': date.today().strftime(invoice_date_format),
             'invoice_delivery_date': (date.today().replace(day=1) - timedelta(days=1)).strftime(invoice_date_format),
-            'description': 'Project: FFP150008, promotor: David Martens. ',
+            'description': '',
             'nr_of_days': '{0:.1f}'.format(total_days),
             'rate': '{0:.2f}'.format(project.rate),
             'total': '{0:.2f}'.format(total_price),
             'vat': '{0:.2f}'.format(total_price * 0.21),
             'total_vat': '{0:.2f}'.format(total_price * 1.21)
         }
-        return render_to_response('invoice.html', context)
+        return render(request, 'invoice.html', context)
 
 def get_time_entries(request):
     if request.method == 'GET':
