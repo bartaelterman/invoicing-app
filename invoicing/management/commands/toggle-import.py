@@ -100,6 +100,8 @@ class Command(BaseCommand):
         entries = toggl.getTimeEntries(start, end)
         projects_hash = {}
         for entry in entries:
+            if not 'pid' in entry.keys():
+                raise RuntimeError('entry has no project: {}'.format(entry))
             if projects_hash.get(entry['pid']):
                 project = projects_hash.get(entry['pid'])
             else:
