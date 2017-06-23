@@ -105,17 +105,20 @@ class Command(BaseCommand):
             if projects_hash.get(entry['pid']):
                 project = projects_hash.get(entry['pid'])
             else:
-                project = Project.objects.get(togglId=entry['pid'])
-                projects_hash[entry['pid']] = project
-            entry_start = parse(entry['start'])
-            duration = entry['duration'] / 3600.0
-            db_entry = TimeEntry(
-                project=project,
-                start=entry_start,
-                duration=duration,
-                togglId=entry['id']
-            )
-            try:
-                db_entry.save()
-            except IntegrityError as ex:
-                pass
+                try:
+                    project = Project.objects.get(togglId=entry['pid'])
+                    projects_hash[entry['pid']] = project
+                    entry_start = parse(entry['start'])
+                    duration = entry['duration'] / 3600.0
+                    db_entry = TimeEntry(
+                        project=project,
+                        start=entry_start,
+                        duration=duration,
+                        togglId=entry['id']
+                    )
+                    db_entry.save()
+                except Project.DoesNotExist:
+                    print('unknown project: {}'.format(entry['pid']))
+                    continue
+                except IntegrityError as ex:
+                    pass
