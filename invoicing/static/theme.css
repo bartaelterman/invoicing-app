@@ -2,6 +2,18 @@ body {
     font-family: Georgia;
 }
 
+#user-details {
+    float: left;
+}
+
+#customer-details {
+    float: right;
+}
+
+#invoice-details {
+    float: left;
+}
+
 header {}
 h1 {
     margin-top: 50px;
@@ -12,8 +24,15 @@ small {
     font-size: 1em;
 }
 
+table {
+    width: 80%;
+    border-collapse: collapse;
+}
+
 table, th, td {
-   border: 1px solid #aaa;
+   border: 1px solid grey;
+    padding: 15px;
+    text-align: center;
 }
 
 th, td {
@@ -31,4 +50,9 @@ ul {
 .duration {
     font-weight: bold;
     font-size: 1.2em;
+}
+
+.date-label {
+    font-size: .8em;
+    color: grey;
 }

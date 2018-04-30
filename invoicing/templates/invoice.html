@@ -30,10 +30,13 @@
         <div class="col-md-offset-1 col-md-10"id="invoice-details">
             <ul>
                 <li><b>Factuurgegevens</b></li>
+{#                <li>Bestelbonnummer: {{ bestelbonnummer }}</li>#}
                 <li>Factuurnummer: {{ invoice_number }}</li>
                 <li>Factuurdatum: {{ invoice_date }}</li>
                 <li>Leveringsdatum: {{ invoice_delivery_date }}</li>
+                {% if description %}
                 <li>Betreft: {{ description }}</li>
+                {%  endif %}
             </ul>
         </div>
     </div>

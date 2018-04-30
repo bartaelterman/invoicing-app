@@ -7,6 +7,7 @@ class TimesheetForm(forms.Form):
     start = forms.DateField(label='Start date', widget=forms.TextInput(attrs={'class':'datepicker'}))
     end = forms.DateField(label='End date', widget=forms.TextInput(attrs={'class':'datepicker'}))
     unit = forms.ChoiceField(choices=(('days', 'days'), ('hours', 'hours')))
+    output = forms.ChoiceField(choices=(('html', 'html'), ('pdf', 'pdf')))
 
 
 class InvoiceForm(forms.Form):

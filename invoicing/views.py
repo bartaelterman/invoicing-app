@@ -3,8 +3,10 @@ from collections import defaultdict
 from django.contrib.auth import authenticate, login
 from django.http import HttpResponse
 from django.shortcuts import render
+from django.template import loader
 from django.template import RequestContext
 from datetime import date, datetime, timedelta
+from weasyprint import HTML
 from .models import Client, Invoice, Profile, Project, TimeEntry
 from .forms import InvoiceForm, TimesheetForm
 
@@ -23,6 +25,7 @@ def display_timesheet(request):
       - start: start date (yyyy-mm-dd)
       - end: end date (yyyy-mm-dd)
     """
+    # TODO: add calendar UI element to select dates
     if request.method == 'GET':
         print(request.GET)
         project_id = request.GET.get('project', '1')
@@ -49,7 +52,7 @@ def display_timesheet(request):
             weeknr = str(day.isocalendar()[0]) + '_' + '{:02}'.format(day.isocalendar()[1])
             print(weeknr)
             weekday = ['', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'][day.isocalendar()[2]]
-            entries_by_week_dict[weeknr][weekday] = {'date': day.strftime('%d-%m-%Y'), 'duration': duration}
+            entries_by_week_dict[weeknr][weekday] = {'date': day.strftime('%d-%m'), 'duration': duration}
         entries_by_week = [entries_by_week_dict[x] for x in sorted(entries_by_week_dict.keys())]
 
         timeentries = entries.to_dict(orient='records')
@@ -68,7 +71,13 @@ def display_timesheet(request):
             'user': user
         }
         template_file = project.timesheet_template if project.timesheet_template else 'calendar_timesheet.html'
-        return render(request, template_file, context)
+        content = loader.render_to_string(template_file, context, request, using=None)
+        if request.GET.get('output', '') == 'pdf':
+            response = HttpResponse(content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{project}_timesheet_{start_out_str}_{end_out_str}.pdf"'
+            HTML(string=content).write_pdf(response, stylesheets=['invoicing/static/theme.css'])
+            return response
+        return HttpResponse(content, None, 200)
 
 
 def generate_invoice(request):
@@ -107,6 +116,7 @@ def display_invoice(request):
         end_str = request.GET.get('end', '2017-12-31')
         number = request.GET.get('number', '1')
         total_days = float(request.GET.get('days', '0'))
+        description = request.GET.get('description', '')
 
         invoice_date_format = '%d/%m/%Y'
         out_start = datetime.strptime(start_str, '%Y-%m-%d').strftime(invoice_date_format)

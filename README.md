@@ -7,6 +7,8 @@ time spent on a project and generate time sheets and invoices.
 
 # Install
 
+- Before you install the python requirements, install [cairo](https://www.cairographics.org/download/). (On MacOSX, do `brew install cairo`)
+- Install pango. (On MacOSX, `brew install pango`)
 - Install the requirements in [the requirements file](./requirements.txt)
 - Configure your database in [the settings file](./webapp/settings.py) (or
 don't if you're ok with a local sqlite database)
