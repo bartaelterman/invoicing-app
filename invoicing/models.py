@@ -46,10 +46,12 @@ class Project(models.Model):
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
     user = models.ForeignKey(Profile)
     name = models.CharField(max_length=200)
-    rate = models.FloatField()  # daily
+    rate = models.DecimalField(max_digits=5, decimal_places=2)  # daily
     togglId = models.CharField(max_length=20, unique=True)
     timesheet_template = models.CharField(max_length=50, null=True, blank=True)
     invoice_template = models.CharField(max_length=50, null=True, blank=True)
+    default_invoice_description = models.CharField(max_length=500, null=True, blank=True)
+    vat_rate = models.DecimalField(max_digits=5, decimal_places=2)  # daily
 
     def __str__(self):
         return self.name
@@ -92,8 +94,10 @@ class Invoice(models.Model):
     date = models.DateField(editable=False)
     start = models.DateField()
     end = models.DateField()
+    delivery_date = models.DateField(blank=True, null=True)
     days = models.DecimalField(max_digits=5, decimal_places=2)
     paid = models.BooleanField(default=False)
+    description = models.CharField(max_length=500, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         ''' On save, update timestamps '''
