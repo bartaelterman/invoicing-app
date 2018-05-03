@@ -9,6 +9,7 @@
 
     <p>Timesheet form</p>
     <form action="{% url 'timesheet' %}">
+        {% csrf_token %}
       {{ form.as_table }}
     <input type="submit">
     </form>

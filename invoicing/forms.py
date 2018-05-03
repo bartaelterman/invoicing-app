@@ -11,7 +11,7 @@ class TimesheetForm(forms.Form):
 
 class InvoiceForm(forms.Form):
     project = forms.ModelChoiceField(label='Project', queryset=Project.objects.all())
-    start = forms.DateField(label='Start date')
-    end = forms.DateField(label='End date')
+    start = forms.DateField(label='Start date', widget=forms.TextInput(attrs={'class':'datepicker'}))
+    end = forms.DateField(label='End date', widget=forms.TextInput(attrs={'class':'datepicker'}))
     delivery_date = forms.DateField(label='Delivery date')
     days = forms.DecimalField(min_value=0, decimal_places=2)
