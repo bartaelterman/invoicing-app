@@ -25,7 +25,6 @@ def display_timesheet(request):
       - start: start date (yyyy-mm-dd)
       - end: end date (yyyy-mm-dd)
     """
-    # TODO: add calendar UI element to select dates
     if request.method == 'GET':
         print(request.GET)
         project_id = request.GET.get('project', '1')
