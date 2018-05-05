@@ -111,35 +111,26 @@ def display_invoice(request):
       - end: end date (yyyy-mm-dd)
     """
     if request.method == 'GET':
-        project_id = request.GET.get('project', '1')
-        start_str = request.GET.get('start', '2017-01-01')
-        end_str = request.GET.get('end', '2017-12-31')
-        number = request.GET.get('number', '1')
-        total_days = float(request.GET.get('days', '0'))
-        description = request.GET.get('description', '')
-
+        invoice_id = request.GET.get('invoiceId', '1')
+        invoice = Invoice.objects.get(pk=int(invoice_id))
         invoice_date_format = '%d/%m/%Y'
-        out_start = datetime.strptime(start_str, '%Y-%m-%d').strftime(invoice_date_format)
-        out_end = datetime.strptime(end_str, '%Y-%m-%d').strftime(invoice_date_format)
 
-        project = Project.objects.get(pk=int(project_id))
-        client = Client.objects.get(pk=int(project.client_id))
-        user = Profile.objects.get(pk=int(project.user_id))
-        total_price = total_days * project.rate
+        total_price = invoice.days * invoice.project.rate
 
         context = {
-            'client': client,
-            'user': user,
-            'invoice_number': number,
-            'invoice_date': date.today().strftime(invoice_date_format),
-            'invoice_delivery_date': (date.today().replace(day=1) - timedelta(days=1)).strftime(invoice_date_format),
-            'description': '',
-            'nr_of_days': '{0:.1f}'.format(total_days),
-            'rate': '{0:.2f}'.format(project.rate),
+            'client': invoice.project.client,
+            'user': invoice.project.user,
+            'invoice_number': invoice.number,
+            'invoice_date': invoice.date.strftime(invoice_date_format),
+            'invoice_delivery_date': invoice.delivery_date.strftime(invoice_date_format),
+            'description': invoice.description,
+            'nr_of_days': '{0:.1f}'.format(invoice.days),
+            'rate': '{0:.2f}'.format(invoice.project.rate),
             'total': '{0:.2f}'.format(total_price),
-            'vat': '{0:.2f}'.format(total_price * 0.21),
-            'total_vat': '{0:.2f}'.format(total_price * 1.21)
+            'vat': '{0:.2f}'.format(float(total_price) * float(invoice.project.vat_rate)),
+            'total_vat': '{0:.2f}'.format(float(total_price) * (1 + float(invoice.project.vat_rate)))
         }
+
         return render(request, 'invoice.html', context)
 
 def get_time_entries(request):
