@@ -91,9 +91,10 @@ def generate_invoice(request):
         end_str = request.POST.get('end')
         end = date(*[int(x) for x in end_str.split('-')])
         days = request.POST.get('days')
-        invoice = Invoice(project=project, start=start, end=end, days=days)
+        delivery_date = request.POST.get('delivery_date')
+        invoice = Invoice(project=project, start=start, end=end, days=days, delivery_date=delivery_date)
         invoice.save()
-    existing_invoices = Invoice.objects.all()
+    existing_invoices = Invoice.objects.all().order_by('-number')
     context = {'form': form, 'invoices': existing_invoices}
     return render(request, 'invoice_form.html', context)
 
@@ -103,34 +104,51 @@ def display_invoice(request):
     get all time entries for a project and date range, and generate a invoice.
 
     Expected query parameters:
-      - days: total number of days to be invoiced
-      - number: invoice number
-      - project: project id
-      - start: start date (yyyy-mm-dd)
-      - end: end date (yyyy-mm-dd)
+      - invoiceId
     """
     if request.method == 'GET':
         invoice_id = request.GET.get('invoiceId', '1')
         invoice = Invoice.objects.get(pk=int(invoice_id))
         invoice_date_format = '%d/%m/%Y'
-
         total_price = invoice.days * invoice.project.rate
+        invoice_items = [
+            {'description': '{} dagen ontwikkeling (aan €{} per dag)'.format(invoice.days, invoice.project.rate),
+             'price': '{0:.2f}'.format(invoice.days * invoice.project.rate),
+             'vat': '{0:.2f}'.format(invoice.days * invoice.project.rate * invoice.vat_rate / 100)}]
+        if invoice.invoiceitem_set.all().count() > 0:
+            for item in invoice.invoiceitem_set.all():
+                invoice_items.append({
+                    'description': item.description,
+                    'price': '{0:.2f}'.format(item.price),
+                    'vat': '{0:.2f}'.format(item.price * invoice.vat_rate / 100)})
+                total_price += item.price
 
         context = {
             'client': invoice.project.client,
             'user': invoice.project.user,
             'invoice_number': invoice.number,
+            'start': invoice.start.strftime(invoice_date_format),
+            'end': invoice.end.strftime(invoice_date_format),
             'invoice_date': invoice.date.strftime(invoice_date_format),
             'invoice_delivery_date': invoice.delivery_date.strftime(invoice_date_format),
+            'invoice_items': invoice_items,
             'description': invoice.description,
             'nr_of_days': '{0:.1f}'.format(invoice.days),
             'rate': '{0:.2f}'.format(invoice.project.rate),
             'total': '{0:.2f}'.format(total_price),
             'vat': '{0:.2f}'.format(float(total_price) * float(invoice.project.vat_rate)),
-            'total_vat': '{0:.2f}'.format(float(total_price) * (1 + float(invoice.project.vat_rate)))
+            'total_vat': '{0:.2f}'.format(float(total_price) * (1 + float(invoice.project.vat_rate))),
+            'vat_rate': invoice.vat_rate
         }
 
-        return render(request, 'invoice.html', context)
+        content = loader.render_to_string(invoice.project.invoice_template, context, request, using=None)
+        if request.GET.get('output', '') == 'pdf':
+            response = HttpResponse(content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{invoice.number}_invoice_{invoice.project}.pdf"'
+            HTML(string=content).write_pdf(response, stylesheets=['invoicing/static/theme.css'])
+            return response
+        return HttpResponse(content, None, 200)
+
 
 def get_time_entries(request):
     if request.method == 'GET':

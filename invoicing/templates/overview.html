@@ -1,0 +1,91 @@
+{% extends 'report_base.html' %}
+
+{% block body %}
+
+    <div class="row">
+        <div class="col-md-5 col-md-offset-1" id="projects">
+        <a href="/admin">Back to admin</a>
+
+        <h1>Projects</h1>
+            <ul>
+            {% for project in projects %}
+                <li>{{ project.name }}</li>
+            {% endfor %}
+
+            </ul>
+
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-5 col-md-offset-1" id="projects">
+
+        <h1>Invoices</h1>
+            <table>
+                <thead>
+                    <th>Number</th>
+                    <th>Project</th>
+                    <th>Date</th>
+                    <th>Start</th>
+                    <th>End</th>
+                    <th>Days</th>
+                    <th>Paid</th>
+
+                </thead>
+                <tbody>
+                {% for invoice in invoices %}
+                    <tr>
+                        <td>{{ invoice.number }}</td>
+                        <td>{{ invoice.project }}</td>
+                        <td>{{ invoice.date }}</td>
+                        <td>{{ invoice.start }}</td>
+                        <td>{{ invoice.end }}</td>
+                        <td>{{ invoice.days }}</td>
+                        <td>
+                        {% if not invoice.paid %}
+                         <b>
+                         {% endif %}
+                        {{ invoice.paid }}
+                        {% if not invoice.paid %}
+                         </b>
+                        {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-5 col-md-offset-1" id="projects">
+
+        <h1>Uninvoiced time entries</h1>
+            <table>
+{#                <thead>#}
+{#                    <th>Number</th>#}
+{#                    <th>Project</th>#}
+{#                    <th>Date</th>#}
+{#                    <th>Start</th>#}
+{#                    <th>End</th>#}
+{#                    <th>Days</th>#}
+{#                    <th>Paid</th>#}
+{##}
+{#                </thead>#}
+                <tbody>
+                {% for entry in uninvoiced_entries %}
+                    <tr>
+                        <td>{{ entry.start }}</td>
+                        <td>{{ entry.project }}</td>
+                        <td>{{ entry.duration }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+<br><br>
+
+{% endblock %}

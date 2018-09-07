@@ -90,7 +90,7 @@ class Invoice(models.Model):
     """
     number = models.IntegerField(unique=True, blank=True, null=True, help_text='autofilled, only fill in yourself if you want to override the default')  # will be autofilled, but is editable
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
-    VAT_percentage = models.IntegerField(default=21)  # or should this be a part of the Project?
+    vat_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0.21)  # daily
     date = models.DateField(editable=False)
     start = models.DateField()
     end = models.DateField()
@@ -111,3 +111,9 @@ class Invoice(models.Model):
 
     def __str__(self):
         return '{} - {}: {}'.format(self.date, self.number, self.project)
+
+
+class InvoiceItem(models.Model):
+    invoice = models.ForeignKey(Invoice)
+    description = models.TextField(null=True, blank=True)
+    price = models.DecimalField(max_digits=7, decimal_places=2)

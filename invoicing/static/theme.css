@@ -1,18 +1,15 @@
 body {
     font-family: Georgia;
+    font-size: 0.8em;
 }
 
-#user-details {
-    float: left;
-}
+/*#user-invoice-details {*/
+    /*float: left;*/
+/*}*/
 
-#customer-details {
-    float: right;
-}
-
-#invoice-details {
-    float: left;
-}
+/*#customer-details {*/
+    /*float: left;*/
+/*}*/
 
 header {}
 h1 {

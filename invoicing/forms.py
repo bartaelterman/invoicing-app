@@ -14,5 +14,6 @@ class InvoiceForm(forms.Form):
     project = forms.ModelChoiceField(label='Project', queryset=Project.objects.all())
     start = forms.DateField(label='Start date', widget=forms.TextInput(attrs={'class':'datepicker'}))
     end = forms.DateField(label='End date', widget=forms.TextInput(attrs={'class':'datepicker'}))
-    delivery_date = forms.DateField(label='Delivery date')
+    delivery_date = forms.DateField(label='Delivery date', widget=forms.TextInput(attrs={'class':'datepicker'}))
     days = forms.DecimalField(min_value=0, decimal_places=2)
+    output = forms.ChoiceField(choices=(('html', 'html'), ('pdf', 'pdf')))

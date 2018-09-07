@@ -17,6 +17,14 @@ class Command(BaseCommand):
         parser.add_argument('start_date', type=str)
         parser.add_argument('end_date', type=str)
 
+
+    def entries_to_df(self, entries):
+        df = pd.DataFrame(entries)
+        return df
+
+    def load_projects(self):
+        return Project.objects.all()
+
     def check_entries(self, entries_df):
         entries_df['start_date'] = entries_df['start'].str[:10]
         entries_df['stop_date'] = entries_df['stop'].str[:10]

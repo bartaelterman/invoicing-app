@@ -19,7 +19,10 @@
     <div id="invoices_list">
     <ul>
     {% for invoice in invoices %}
-        <li><a href="{% url 'display_invoice' %}?invoiceId={{ invoice.id }}">{{ invoice }}</a></li>
+        <li>{{ invoice }}:
+            <a href="{% url 'display_invoice' %}?invoiceId={{ invoice.id }}&output=pdf">pdf</a>
+            <a href="{% url 'display_invoice' %}?invoiceId={{ invoice.id }}&output=html">html</a>
+        </li>
     {% endfor %}
     </ul>
     </div>

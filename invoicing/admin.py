@@ -1,6 +1,11 @@
 from django.contrib import admin
-from .models import Client, Invoice, Profile, Project, TimeEntry
+from .models import Client, Invoice, InvoiceItem, Profile, Project, TimeEntry
 from admin_views.admin import AdminViews
+
+
+class InvoiceItemInline(admin.TabularInline):
+    model = InvoiceItem
+
 
 class ProjectAdmin(AdminViews):
     admin_views = (
@@ -9,7 +14,8 @@ class ProjectAdmin(AdminViews):
     )
 
 class InvoiceAdmin(admin.ModelAdmin):
-    change_form_template = 'admin/invoice_change_form.html'
+    # change_form_template = 'admin/invoice_change_form.html'
+    inlines = [InvoiceItemInline]
 
 
 class TimeEntryAdmin(admin.ModelAdmin):
@@ -20,6 +26,7 @@ class TimeEntryAdmin(admin.ModelAdmin):
 admin.site.register(Project, ProjectAdmin)
 
 admin.site.register(Client)
-admin.site.register(Invoice)
+admin.site.register(Invoice, InvoiceAdmin)
+admin.site.register(InvoiceItem)
 admin.site.register(Profile)
 admin.site.register(TimeEntry, TimeEntryAdmin)
