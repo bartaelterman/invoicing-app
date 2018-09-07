@@ -83,6 +83,13 @@ class TimeEntry(models.Model):
     def __str__(self):
         return '{0} : {1}'.format(self.project, self.start.isoformat())
 
+    def to_dict(self):
+        return {
+            'start': self.start,
+            'duration': self.duration,
+            'duration_unit': self.duration_unit
+        }
+
 
 class Invoice(models.Model):
     """
