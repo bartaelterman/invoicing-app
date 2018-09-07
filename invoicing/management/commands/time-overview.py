@@ -35,10 +35,10 @@ class Command(BaseCommand):
 
         for project in projects:
             time_entries_df = self.entries_to_df([x.to_dict() for x in project.timeentry_set.all()])
-            print(f"\n{project.name}\n===============""")
             if len(time_entries_df) > 0:
                 self.convert_durations_to_hour(time_entries_df)
                 time_by_year = self.entries_total_time_by_year(time_entries_df)
+                print(f"\n{project.name}\n===============""")
                 print(time_by_year.to_csv(sep='\t'))
             else:
                 print('-')
