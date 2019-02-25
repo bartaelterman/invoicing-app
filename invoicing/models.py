@@ -50,6 +50,7 @@ class Project(models.Model):
     togglId = models.CharField(max_length=20, unique=True)
     timesheet_template = models.CharField(max_length=50, null=True, blank=True)
     invoice_template = models.CharField(max_length=50, null=True, blank=True)
+    credit_template = models.CharField(max_length=50, null=True, blank=True)
     default_invoice_description = models.CharField(max_length=500, null=True, blank=True)
     vat_rate = models.DecimalField(max_digits=5, decimal_places=2)  # daily
 
@@ -105,6 +106,7 @@ class Invoice(models.Model):
     days = models.DecimalField(max_digits=5, decimal_places=2)
     paid = models.BooleanField(default=False)
     description = models.CharField(max_length=500, null=True, blank=True)
+    is_credit_invoice = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         ''' On save, update timestamps '''
@@ -124,3 +126,4 @@ class InvoiceItem(models.Model):
     invoice = models.ForeignKey(Invoice)
     description = models.TextField(null=True, blank=True)
     price = models.DecimalField(max_digits=7, decimal_places=2)
+    vat_rate = models.DecimalField(max_digits=7, decimal_places=2, help_text='If the VAT% is not equal to the overall VAT rate', null=True, blank=True)

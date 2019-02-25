@@ -93,6 +93,8 @@ def generate_invoice(request):
         days = request.POST.get('days')
         delivery_date = request.POST.get('delivery_date')
         invoice = Invoice(project=project, start=start, end=end, days=days, delivery_date=delivery_date)
+        if project.default_invoice_description:
+            invoice.description = project.default_invoice_description
         invoice.save()
     existing_invoices = Invoice.objects.all().order_by('-number')
     context = {'form': form, 'invoices': existing_invoices}
@@ -111,17 +113,22 @@ def display_invoice(request):
         invoice = Invoice.objects.get(pk=int(invoice_id))
         invoice_date_format = '%d/%m/%Y'
         total_price = invoice.days * invoice.project.rate
+        total_vat = invoice.days * invoice.project.rate * invoice.vat_rate
         invoice_items = [
             {'description': '{} dagen ontwikkeling (aan €{} per dag)'.format(invoice.days, invoice.project.rate),
              'price': '{0:.2f}'.format(invoice.days * invoice.project.rate),
-             'vat': '{0:.2f}'.format(invoice.days * invoice.project.rate * invoice.vat_rate / 100)}]
+             'vat': '{0:.2f}'.format(invoice.days * invoice.project.rate * invoice.vat_rate),
+             'vat_rate': int(invoice.project.vat_rate * 100)}]
         if invoice.invoiceitem_set.all().count() > 0:
             for item in invoice.invoiceitem_set.all():
+                item_vat_rate = item.vat_rate if item.vat_rate else invoice.vat_rate
                 invoice_items.append({
                     'description': item.description,
                     'price': '{0:.2f}'.format(item.price),
-                    'vat': '{0:.2f}'.format(item.price * invoice.vat_rate / 100)})
+                    'vat': '{0:.2f}'.format(item.price * item_vat_rate),
+                    'vat_rate': int(item_vat_rate * 100)})
                 total_price += item.price
+                total_vat += item.price * item_vat_rate
 
         context = {
             'client': invoice.project.client,
@@ -136,12 +143,13 @@ def display_invoice(request):
             'nr_of_days': '{0:.1f}'.format(invoice.days),
             'rate': '{0:.2f}'.format(invoice.project.rate),
             'total': '{0:.2f}'.format(total_price),
-            'vat': '{0:.2f}'.format(float(total_price) * float(invoice.project.vat_rate)),
-            'total_vat': '{0:.2f}'.format(float(total_price) * (1 + float(invoice.project.vat_rate))),
-            'vat_rate': invoice.vat_rate
+            'vat': '{0:.2f}'.format(total_vat),
+            'total_vat': '{0:.2f}'.format(float(total_price) + float(total_vat)),
         }
 
-        content = loader.render_to_string(invoice.project.invoice_template, context, request, using=None)
+        template = invoice.project.invoice_template if not invoice.is_credit_invoice else invoice.project.credit_template
+
+        content = loader.render_to_string(template, context, request, using=None)
         if request.GET.get('output', '') == 'pdf':
             response = HttpResponse(content_type='application/pdf')
             response['Content-Disposition'] = f'attachment; filename="{invoice.number}_invoice_{invoice.project}.pdf"'
