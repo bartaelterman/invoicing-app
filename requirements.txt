@@ -37,7 +37,7 @@ python-dateutil==2.7.3
 pytz==2016.10
 PyYAML==3.12
 quantum-ql==0.0.1
-requests==2.13.0
+requests==2.20.0
 semantic-version==2.5.0
 simplegeneric==0.8.1
 six==1.10.0
