@@ -122,6 +122,28 @@ class Invoice(models.Model):
         return '{} - {}: {}'.format(self.date, self.number, self.project)
 
 
+class CreditNote(models.Model):
+    number = models.IntegerField(unique=True, blank=True, null=True, help_text='autofilled, only fill in yourself if you want to override the default')  # will be autofilled, but is editable
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    vat_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0.21)  # daily
+    date = models.DateField(editable=False)
+    amount = models.DecimalField(max_digits=8, decimal_places=2)
+    description = models.CharField(max_length=500, null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        ''' On save, update timestamps '''
+        if not self.id:
+            if not self.number:
+                credit_note_highest_number = CreditNote.objects.all().order_by('-number').first()
+                latest_number = credit_note_highest_number.number
+                self.number = latest_number + 1
+            self.date = date.today()
+        return super(CreditNote, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return 'Creditnote {} - {}: {}'.format(self.date, self.number, self.project)
+
+
 class InvoiceItem(models.Model):
     invoice = models.ForeignKey(Invoice)
     description = models.TextField(null=True, blank=True)

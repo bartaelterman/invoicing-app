@@ -1,14 +1,13 @@
 import pandas as pd
 from collections import defaultdict
-from django.contrib.auth import authenticate, login
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.template import loader
-from django.template import RequestContext
 from datetime import date, datetime, timedelta
 from weasyprint import HTML
-from .models import Client, Invoice, Profile, Project, TimeEntry
+from .models import Client, CreditNote, Invoice, Profile, Project, TimeEntry
 from .forms import InvoiceForm, TimesheetForm
+
 
 def generate_timesheet(request):
     form = TimesheetForm()
@@ -83,7 +82,6 @@ def generate_invoice(request):
     if request.method == 'GET':
         form = InvoiceForm()
     elif request.method == 'POST':
-        # todo: add toaster message
         form = InvoiceForm(initial=request.POST)
         project = Project.objects.get(pk=request.POST.get('project'))
         start_str = request.POST.get('start')
@@ -97,7 +95,8 @@ def generate_invoice(request):
             invoice.description = project.default_invoice_description
         invoice.save()
     existing_invoices = Invoice.objects.all().order_by('-number')
-    context = {'form': form, 'invoices': existing_invoices}
+    existing_creditnotes = CreditNote.objects.all().order_by('-number')
+    context = {'form': form, 'invoices': existing_invoices, 'creditnotes': existing_creditnotes}
     return render(request, 'invoice_form.html', context)
 
 
@@ -115,7 +114,7 @@ def display_invoice(request):
         total_price = invoice.days * invoice.project.rate
         total_vat = invoice.days * invoice.project.rate * invoice.vat_rate
         invoice_items = [
-            {'description': '{} dagen ontwikkeling (aan €{} per dag)'.format(invoice.days, invoice.project.rate),
+            {'description': '{} dagen ontwikkeling aan €{} per dag (waarvan 15% auteursrechten)'.format(invoice.days, invoice.project.rate),
              'price': '{0:.2f}'.format(invoice.days * invoice.project.rate),
              'vat': '{0:.2f}'.format(invoice.days * invoice.project.rate * invoice.vat_rate),
              'vat_rate': int(invoice.project.vat_rate * 100)}]
@@ -140,7 +139,7 @@ def display_invoice(request):
             'invoice_delivery_date': invoice.delivery_date.strftime(invoice_date_format),
             'invoice_items': invoice_items,
             'description': invoice.description,
-            'nr_of_days': '{0:.1f}'.format(invoice.days),
+            'nr_of_days': '{0:.2f}'.format(invoice.days),
             'rate': '{0:.2f}'.format(invoice.project.rate),
             'total': '{0:.2f}'.format(total_price),
             'vat': '{0:.2f}'.format(total_vat),
@@ -153,6 +152,39 @@ def display_invoice(request):
         if request.GET.get('output', '') == 'pdf':
             response = HttpResponse(content_type='application/pdf')
             response['Content-Disposition'] = f'attachment; filename="{invoice.number}_invoice_{invoice.project}.pdf"'
+            HTML(string=content).write_pdf(response, stylesheets=['invoicing/static/theme.css'])
+            return response
+        return HttpResponse(content, None, 200)
+
+
+def display_creditnote(request):
+    """
+    Display the creditnote
+    """
+    if request.method == 'GET':
+        creditnote_id = request.GET.get('creditnoteId', '1')
+        creditnote = CreditNote.objects.get(pk=int(creditnote_id))
+        date_format = '%d/%m/%Y'
+        total_price = creditnote.amount
+        total_vat = creditnote.amount * creditnote.vat_rate
+
+        context = {
+            'client': creditnote.project.client,
+            'user': creditnote.project.user,
+            'creditnote_number': creditnote.number,
+            'creditnote_date': creditnote.date.strftime(date_format),
+            'description': creditnote.description,
+            'total': '{0:.2f}'.format(total_price),
+            'vat': '{0:.2f}'.format(total_vat),
+            'total_vat': '{0:.2f}'.format(float(total_price) + float(total_vat)),
+        }
+
+        template = creditnote.project.credit_template
+
+        content = loader.render_to_string(template, context, request, using=None)
+        if request.GET.get('output', '') == 'pdf':
+            response = HttpResponse(content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{creditnote.number}_creditnote_{creditnote.project}.pdf"'
             HTML(string=content).write_pdf(response, stylesheets=['invoicing/static/theme.css'])
             return response
         return HttpResponse(content, None, 200)

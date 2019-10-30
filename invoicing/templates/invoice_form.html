@@ -27,6 +27,18 @@
     </ul>
     </div>
 
+    <h2>Existing creditnotes</h2>
+    <div id="creditnotes_list">
+    <ul>
+    {% for creditnote in creditnotes %}
+        <li>{{ creditnote }}:
+            <a href="{% url 'display_creditnote' %}?creditnoteId={{ creditnote.id }}&output=pdf">pdf</a>
+            <a href="{% url 'display_creditnote' %}?creditnoteId={{ creditnote.id }}&output=html">html</a>
+        </li>
+    {% endfor %}
+    </ul>
+    </div>
+
      <script>
           $(function() {
             $( ".datepicker" ).datepicker({
