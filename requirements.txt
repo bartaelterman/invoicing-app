@@ -18,7 +18,7 @@ docutils==0.14
 html5lib==1.0.1
 ipython==5.3.0
 ipython-genutils==0.1.0
-Jinja2==2.9.4
+Jinja2==2.11.3
 jmespath==0.9.3
 MarkupSafe==0.23
 numpy==1.12.0
