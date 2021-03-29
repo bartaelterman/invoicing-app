@@ -31,7 +31,7 @@ Pillow==5.0.0
 prompt-toolkit==1.0.13
 ptyprocess==0.5.1
 pycparser==2.18
-Pygments==2.2.0
+Pygments==2.7.4
 Pyphen==0.9.4
 python-dateutil==2.7.3
 pytz==2016.10
