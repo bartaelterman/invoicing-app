@@ -28,6 +28,7 @@ class Profile(models.Model):
     address_line_1 = models.CharField(max_length=100)
     address_line_2 = models.CharField(max_length=100)
     bank_account = models.CharField(max_length=20, unique=True)
+    bic_account_code = models.CharField(max_length=20, null=True, blank=True)
     phone = models.CharField(max_length=20, unique=True)
     email = models.EmailField()
     VAT_number = models.CharField(max_length=20, unique=True)

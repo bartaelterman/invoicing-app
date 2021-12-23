@@ -45,7 +45,7 @@ def display_timesheet(request):
         # entries['week'] = entries['start'].apply(lambda x: x.isocalendar()[1])
         # entries['weekday'] = entries['start'].apply(lambda x: x.isoweekday())
         entries_by_week_dict = defaultdict(dict)
-        for day in pd.date_range(start=start_str, end=end_str):
+        for day in pd.date_range(start=start_str, end=end_str, tz="UTC"):
             duration = entries[(entries['start'] >= day) & (entries['start'] <= day + timedelta(days=1))]['duration'].sum()
             weeknr = str(day.isocalendar()[0]) + '_' + '{:02}'.format(day.isocalendar()[1])
             print(weeknr)
@@ -142,7 +142,7 @@ def display_invoice(request):
             'nr_of_days': '{0:.2f}'.format(invoice.days),
             'rate': '{0:.2f}'.format(invoice.project.rate),
             'total': '{0:.2f}'.format(total_price),
-            'vat': '{0:.2f}'.format(total_vat),
+            'vat': '{0:.2f}'.format(total_vat) if total_vat > 0 else '0.00 (customer is VAT exempt)',
             'total_vat': '{0:.2f}'.format(float(total_price) + float(total_vat)),
         }
 
